@@ -1,0 +1,13 @@
+fastapi
+uvicorn
+python-multipart
+playwright
+supabase
+google-generativeai
+apscheduler
+python-dotenv
+Pillow
+python-jose[cryptography]
+cryptography
+pywebpush
+requests
