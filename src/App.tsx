@@ -1,4 +1,4 @@
-import { Routes, Route, Navigate, useLocation } from 'react-router'
+import { Routes, Route, Navigate } from 'react-router'
 import { useAuth } from '@/hooks/useAuth'
 import Setup from '@/pages/Setup'
 import Dashboard from '@/pages/Dashboard'
