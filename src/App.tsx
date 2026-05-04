@@ -11,7 +11,6 @@ import { Loader2 } from 'lucide-react'
 
 function App() {
   const { setupComplete, loading } = useAuth()
-  const location = useLocation()
   const deviceToken = localStorage.getItem('device_token')
   
   if (loading) {
