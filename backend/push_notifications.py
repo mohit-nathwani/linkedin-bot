@@ -1,6 +1,6 @@
 from pywebpush import webpush, WebPushException
-from backend.db_client import supabase
-from backend.config import VAPID_PRIVATE_KEY, VAPID_PUBLIC_KEY
+from db_client import supabase
+from config import VAPID_PRIVATE_KEY, VAPID_PUBLIC_KEY
 import json
 import uuid
 from datetime import datetime

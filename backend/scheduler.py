@@ -2,8 +2,8 @@ import random
 from datetime import datetime, date, timedelta
 from apscheduler.schedulers.background import BackgroundScheduler
 from apscheduler.triggers.cron import CronTrigger
-from backend.db_client import supabase
-from backend.automation import run_daily_connection_job, run_acceptance_checker_job, run_second_followup_job, run_email_report_job
+from db_client import supabase
+from automation import run_daily_connection_job, run_acceptance_checker_job, run_second_followup_job, run_email_report_job
 
 scheduler = BackgroundScheduler(timezone="Asia/Kolkata")
 

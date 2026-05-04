@@ -2,9 +2,9 @@ import smtplib
 from email.mime.text import MIMEText
 from email.mime.multipart import MIMEMultipart
 from datetime import datetime, date, timedelta
-from backend.db_client import supabase
-from backend.config import GMAIL_USER, GMAIL_APP_PASSWORD
-from backend.encryption import decrypt_value
+from db_client import supabase
+from config import GMAIL_USER, GMAIL_APP_PASSWORD
+from encryption import decrypt_value
 
 def send_email_report():
     cfg = supabase.table("config").select("*").eq("id", 1).maybe_single().execute()

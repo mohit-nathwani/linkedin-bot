@@ -7,10 +7,10 @@ import random
 import string
 from datetime import datetime, timedelta, date
 from jose import jwt, JWTError
-from backend.db_client import supabase
-from backend.config import ENCRYPTION_KEY, VAPID_PUBLIC_KEY, FRONTEND_URL
-from backend.encryption import encrypt_value, decrypt_value
-from backend.scheduler import start_scheduler
+from db_client import supabase
+from config import ENCRYPTION_KEY, VAPID_PUBLIC_KEY, FRONTEND_URL
+from encryption import encrypt_value, decrypt_value
+from scheduler import start_scheduler
 
 app = FastAPI(title="LinkedIn Outreach Bot API", version="1.0.0")
 
@@ -299,7 +299,7 @@ def subscribe_push(payload: PushSubscription):
 
 @app.post("/api/push/test")
 def send_test_notification(payload: Dict[str, str]):
-    from backend.push_notifications import send_push_to_device
+    from push_notifications import send_push_to_device
     device_id = payload.get("device_id")
     if device_id:
         send_push_to_device(device_id, "Test Notification", "This is a test push from LinkedReach.")
@@ -362,7 +362,7 @@ def schedule_override(payload: ScheduleOverride):
     else:
         schedule = {"week_start": monday.isoformat(), "scheduled_days": [], "daily_targets": {}, "actual_sent": {}, "campaign_rotation": {}}
     if payload.action == "regenerate_week":
-        from backend.scheduler import generate_weekly_schedule
+        from scheduler import generate_weekly_schedule
         generate_weekly_schedule()
         return {"success": True, "message": "Week schedule regenerated"}
     elif payload.action == "run_today":

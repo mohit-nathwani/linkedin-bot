@@ -5,12 +5,12 @@ import time
 from datetime import datetime, timedelta
 from typing import Optional, Dict, Any
 from playwright.sync_api import sync_playwright, Page, Browser, BrowserContext
-from backend.db_client import supabase
-from backend.config import GEMINI_API_KEY, FRONTEND_URL
-from backend.encryption import decrypt_value
-from backend.gemini_ai import detect_reply_from_screenshot, suggest_locator_from_screenshot
-from backend.push_notifications import send_push_to_all_devices
-from backend.email_reports import send_email_report
+from db_client import supabase
+from config import GEMINI_API_KEY, FRONTEND_URL
+from encryption import decrypt_value
+from gemini_ai import detect_reply_from_screenshot, suggest_locator_from_screenshot
+from push_notifications import send_push_to_all_devices
+from email_reports import send_email_report
 
 STORAGE_STATE_PATH = "/tmp/storage_state.json"
 
