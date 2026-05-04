@@ -5,7 +5,7 @@ from typing import List, Optional, Dict, Any
 import uuid
 import random
 import string
-from datetime import datetime, timedelta, date
+from datetime import datetime, timezone, timedelta, date
 from jose import jwt, JWTError
 from db_client import supabase
 from config import ENCRYPTION_KEY, VAPID_PUBLIC_KEY, FRONTEND_URL
@@ -27,7 +27,7 @@ JWT_SECRET = ENCRYPTION_KEY or "linkedin-bot-secret-key-min-32-chars-long"
 JWT_ALGORITHM = "HS256"
 
 def create_device_token(device_id: str) -> str:
-    return jwt.encode({"device_id": device_id, "exp": datetime.utcnow() + timedelta(days=3650)}, JWT_SECRET, algorithm=JWT_ALGORITHM)
+    return jwt.encode({"device_id": device_id, "exp": datetime.now(timezone.utc) + timedelta(days=3650)}, JWT_SECRET, algorithm=JWT_ALGORITHM)
 
 def verify_device_token(token: str) -> Optional[str]:
     try:
@@ -117,7 +117,7 @@ class NotificationToggle(BaseModel):
 
 @app.get("/api/health")
 def health_check():
-    return {"status": "ok", "time": datetime.utcnow().isoformat()}
+    return {"status": "ok", "time": datetime.now(timezone.utc).isoformat()}
 
 @app.get("/api/config")
 def get_config():
@@ -148,7 +148,7 @@ def save_setup(payload: SetupConfig):
             "gemini_api_key": encrypt_value(payload.gemini_api_key),
             "supabase_url": payload.supabase_url,
             "setup_complete": True,
-            "created_at": datetime.utcnow().isoformat(),
+            "created_at": datetime.now(timezone.utc).isoformat(),
             "vapid_public_key": VAPID_PUBLIC_KEY,
         }
         supabase.table("config").upsert(data).execute()
@@ -197,7 +197,7 @@ def create_campaign(payload: CampaignCreate):
     data["total_sent"] = 0
     data["total_accepted"] = 0
     data["total_replied"] = 0
-    data["created_at"] = datetime.utcnow().isoformat()
+    data["created_at"] = datetime.now(timezone.utc).isoformat()
     data["last_run_at"] = None
     data["delay_warning_acknowledged"] = False
     supabase.table("campaigns").insert(data).execute()
@@ -239,7 +239,7 @@ def stop_campaign(campaign_id: str):
 @app.post("/api/pairing/generate")
 def generate_pairing_code():
     code = "".join(random.choices(string.digits, k=6))
-    expires = datetime.utcnow() + timedelta(minutes=10)
+    expires = datetime.now(timezone.utc) + timedelta(minutes=10)
     data = {
         "id": str(uuid.uuid4()),
         "pairing_code": code,
@@ -258,14 +258,14 @@ def verify_pairing(payload: PairingVerify):
     if not res.data:
         raise HTTPException(status_code=400, detail="Invalid or expired pairing code")
     device = res.data[0]
-    if datetime.fromisoformat(device["code_expires_at"].replace("Z", "+00:00")) < datetime.utcnow():
+    if datetime.fromisoformat(device["code_expires_at"].replace("Z", "+00:00")) < datetime.now(timezone.utc):
         raise HTTPException(status_code=400, detail="Pairing code expired")
     device_id = device["id"]
     token = create_device_token(device_id)
     supabase.table("paired_devices").update({
         "device_token": token,
         "device_label": payload.device_label,
-        "paired_at": datetime.utcnow().isoformat(),
+        "paired_at": datetime.now(timezone.utc).isoformat(),
         "pairing_code": None,
     }).eq("id", device_id).execute()
     return {"device_token": token, "device_id": device_id}
@@ -292,7 +292,7 @@ def subscribe_push(payload: PushSubscription):
         "endpoint": payload.endpoint,
         "p256dh_key": payload.p256dh_key,
         "auth_key": payload.auth_key,
-        "created_at": datetime.utcnow().isoformat(),
+        "created_at": datetime.now(timezone.utc).isoformat(),
     }
     supabase.table("push_subscriptions").upsert(data).execute()
     return {"success": True}
@@ -313,7 +313,7 @@ def list_locators():
 @app.put("/api/locators/{locator_name}")
 def update_locator(locator_name: str, payload: LocatorUpdate):
     data = {k: v for k, v in payload.dict().items() if v is not None}
-    data["last_updated"] = datetime.utcnow().isoformat()
+    data["last_updated"] = datetime.now(timezone.utc).isoformat()
     supabase.table("locators").update(data).eq("name", locator_name).execute()
     return {"success": True}
 
@@ -333,7 +333,7 @@ def add_blacklist(payload: BlacklistEntry):
         "type": payload.type,
         "value": payload.value,
         "reason": payload.reason,
-        "added_at": datetime.utcnow().isoformat(),
+        "added_at": datetime.now(timezone.utc).isoformat(),
     }
     supabase.table("blacklist").insert(data).execute()
     return {"success": True}
@@ -435,7 +435,7 @@ def mark_notification_read(notif_id: str):
 
 @app.post("/api/session/refresh")
 def session_refresh(payload: SessionRefresh):
-    supabase.table("config").update({"session_paused": False, "captcha_detected": False, "last_session_refresh": datetime.utcnow().isoformat()}).eq("id", 1).execute()
+    supabase.table("config").update({"session_paused": False, "captcha_detected": False, "last_session_refresh": datetime.now(timezone.utc).isoformat()}).eq("id", 1).execute()
     return {"success": True, "message": "Session refreshed. Automation will resume on next scheduled run."}
 
 @app.get("/api/session/status")
@@ -473,7 +473,7 @@ def get_warmup_week(campaign_id: str):
     if not camp.get("warm_up_mode"):
         return {"warm_up_active": False, "current_week": None, "current_max": camp.get("daily_max", 25)}
     created = datetime.fromisoformat(camp["created_at"].replace("Z", "+00:00"))
-    days_since = (datetime.utcnow() - created).days
+    days_since = (datetime.now(timezone.utc) - created).days
     week = min(days_since // 7 + 1, 4)
     limits = {1: 5, 2: 10, 3: 15, 4: camp.get("daily_max", 25)}
     return {"warm_up_active": True, "current_week": week, "current_max": limits.get(week, 25)}
