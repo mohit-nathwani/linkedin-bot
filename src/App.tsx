@@ -12,8 +12,9 @@ import { Loader2 } from 'lucide-react'
 function App() {
   const { setupComplete, loading } = useAuth()
   const location = useLocation()
+  const deviceToken = localStorage.getItem('device_token')
   const isPWA = location.pathname === '/pair'
-
+  
   if (loading) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-gray-50">
@@ -22,6 +23,19 @@ function App() {
     )
   }
 
+  // If PWA has device token and setup is done, go to Dashboard
+  if (deviceToken && setupComplete) {
+    if (location.pathname === '/pair') {
+      return <Navigate to="/" />
+    }
+  }
+
+  // If PWA doesn't have device token, show Pairing
+  if (deviceToken === null && !setupComplete) {
+    return <Pairing />
+  }
+
+  // If not paired and setup not done, show Setup
   if (!setupComplete && !isPWA) {
     return <Setup />
   }

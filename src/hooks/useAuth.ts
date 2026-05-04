@@ -10,7 +10,7 @@ export function useAuth() {
 
   const checkSetup = useCallback(async () => {
     try {
-      const res = await fetch(`${API_URL}/api/config`)
+      const res = await fetch(`${API_URL}/api/config?t=${Date.now()}`)
       const data = await res.json()
       setSetupComplete(data.setup_complete)
       setIsAdmin(data.setup_complete)
