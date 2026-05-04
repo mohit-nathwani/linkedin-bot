@@ -13,7 +13,6 @@ function App() {
   const { setupComplete, loading } = useAuth()
   const location = useLocation()
   const deviceToken = localStorage.getItem('device_token')
-  const isPWA = location.pathname === '/pair'
   
   if (loading) {
     return (
@@ -23,23 +22,17 @@ function App() {
     )
   }
 
-  // If PWA has device token and setup is done, go to Dashboard
-  if (deviceToken && setupComplete) {
-    if (location.pathname === '/pair') {
-      return <Navigate to="/" />
-    }
-  }
-
-  // If PWA doesn't have device token, show Pairing
-  if (deviceToken === null && !setupComplete) {
+  // Priority 1: If no device token, show Pairing first (PWA needs to pair before anything else)
+  if (!deviceToken) {
     return <Pairing />
   }
 
-  // If not paired and setup not done, show Setup
-  if (!setupComplete && !isPWA) {
+  // Priority 2: If device token exists but setup not done, show Setup
+  if (!setupComplete) {
     return <Setup />
   }
 
+  // Priority 3: Everything is done, show Dashboard
   return (
     <Routes>
       <Route path="/" element={<Dashboard />} />
