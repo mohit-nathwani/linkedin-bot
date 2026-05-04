@@ -1,7 +1,7 @@
 from cryptography.fernet import Fernet
 import hashlib
 import base64
-from backend.config import ENCRYPTION_KEY
+from config import ENCRYPTION_KEY
 
 def get_fernet():
     key = ENCRYPTION_KEY.encode() if isinstance(ENCRYPTION_KEY, str) else ENCRYPTION_KEY
